@@ -1,6 +1,6 @@
 {
   "name": "next-api-rate-limit",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Rate limit your Next.js API routes by combining serverless cache and redis",
   "main": "./dist/index.js",
   "module": "./dist/index.mjs",

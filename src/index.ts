@@ -1,10 +1,7 @@
 import { Ratelimit } from '@upstash/ratelimit'
-import { kv } from '@vercel/kv'
 import { NextApiRequest, NextApiResponse, NextApiHandler } from 'next'
 import { LRUCache } from 'typescript-lru-cache'
 import { z } from 'zod'
-import { Redis } from '@upstash/redis'
-import { waitUntil } from '@vercel/functions'
 
 const RateLimitOptionsSchema = z.object({
   timeframe: z.number().positive().default(60),
@@ -29,14 +26,16 @@ export function withRateLimit(
     entryExpirationTimeInMS: timeframe * 1000,
   })
 
-  const redisClient = (() => {
-    if (provider === 'upstash') {
-      const { UPSTASH_URL, UPSTASH_TOKEN } = process.env
-      if (!UPSTASH_URL || !UPSTASH_TOKEN) throw new Error('Missing Upstash environment variables')
-      return new Redis({ url: UPSTASH_URL, token: UPSTASH_TOKEN })
-    }
-    return kv
-  })()
+  let redisClient
+  if (provider === 'upstash') {
+    const { UPSTASH_URL, UPSTASH_TOKEN } = process.env
+    if (!UPSTASH_URL || !UPSTASH_TOKEN) throw new Error('Missing Upstash environment variables')
+    const { Redis } = require('@upstash/redis')
+    redisClient = new Redis({ url: UPSTASH_URL, token: UPSTASH_TOKEN })
+  } else {
+    const { kv } = require('@vercel/kv')
+    redisClient = kv
+  }
 
   const ratelimit = new Ratelimit({
     redis: redisClient,
@@ -79,7 +78,7 @@ export function withRateLimit(
 
     try {
       const { success, remaining, reset, pending } = await ratelimit.limit(key)
-      waitUntil(pending)
+      if (pending) await pending
       if (!success) return handleLimitExceeded(key, res)
       if (!disableLRU) return updateCacheAndProceed(remaining - 1, reset, key, req, res)
       return handler(req, res)
