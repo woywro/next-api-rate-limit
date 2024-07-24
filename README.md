@@ -32,7 +32,7 @@ yarn add next-api-rate-limit
 
 ### Middleware Integration
 To use the rate limit middleware, wrap your API route handler with the withRateLimit function.
-```
+```ts
 import { withRateLimit } from 'next-api-rate-limit';
 import { NextApiRequest, NextApiResponse } from 'next';
 
@@ -62,23 +62,23 @@ The middleware accepts a configuration object with the following properties:
 
 ### Envs
 - For Vercel KV:
-```
-KV_URL
-KV_REST_API_URL
-KV_REST_API_TOKEN
-KV_REST_API_READ_ONLY_TOKEN
+```bash
+KV_URL=
+KV_REST_API_URL=
+KV_REST_API_TOKEN=
+KV_REST_API_READ_ONLY_TOKEN=
 ```
 - For Upstash:
-```
-UPSTASH_URL
-UPSTASH_TOKEN
+```bash
+UPSTASH_URL=
+UPSTASH_TOKEN=
 ```
 
 ### Key Generation
 The middleware requires a function to generate a unique key for each request, typically based on the client's IP address or some other identifying information. This key is used to track the request count and apply the rate limiting logic.
 
 Example of key generation using IP address:
-```
+```ts
 import { NextApiRequest } from 'next';
 
 const getKeyFromIp = (req: NextApiRequest): string => {
@@ -96,7 +96,7 @@ export default withRateLimit(handler, getKeyFromIp, {
 ### Example with NextAuth
 In this example, the key is generated using the authenticated user's ID from NextAuth.
 
-```
+```ts
 import { withRateLimit } from 'next-api-rate-limit';
 import { NextApiRequest, NextApiResponse } from 'next';
 import { getSession } from 'next-auth/react';
