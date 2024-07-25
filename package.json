@@ -1,6 +1,6 @@
 {
   "name": "next-api-rate-limit",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "Rate limit your Next.js API routes by combining serverless cache and redis",
   "main": "./dist/index.js",
   "module": "./dist/index.mjs",
@@ -42,5 +42,9 @@
     "@vercel/kv": "^2.0.0",
     "typescript-lru-cache": "^2.0.0",
     "zod": "^3.23.8"
+  },
+  "peerDependencies": {
+    "next": ">=12",
+    "react": ">=18"
   }
 }
